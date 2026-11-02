@@ -1,0 +1,1016 @@
+<!doctype html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#10b981">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Docházka">
+<title>Docházka</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.76.1/dist/umd/supabase.js"
+        integrity="sha384-I0S+WEYpKLUT/t1llPKT4+JS+TvKhTBZW6gswQLnxORTICHRt89vwx5dtLl+EfeE"
+        crossorigin="anonymous"></script>
+<style>
+:root {
+  --bg: #f3f4f6; --card: #ffffff; --text: #111418; --muted: #6b7280; --line: #e5e7eb;
+  --accent: #059669; --accent-ink: #ffffff; --accent-soft: #d1fae5; --accent-mid: #6ee7b7;
+  --danger: #dc2626; --danger-soft: #fee2e2; --warn: #b45309; --warn-soft: #fef3c7;
+  --shadow: 0 1px 2px rgba(0,0,0,.06), 0 1px 8px rgba(0,0,0,.04);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0e1013; --card: #181b20; --text: #eceef1; --muted: #9aa2ad; --line: #2a2f36;
+    --accent: #34d399; --accent-ink: #052016; --accent-soft: #0f3529; --accent-mid: #1f7a5a;
+    --danger: #f87171; --danger-soft: #3b1515; --warn: #fbbf24; --warn-soft: #3a2a08;
+    --shadow: none;
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; background: var(--bg); color: var(--text);
+  font: 16px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; border: 0; background: none; padding: 0; }
+.hidden { display: none !important; }
+
+.wrap { max-width: 560px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 8px) 12px calc(env(safe-area-inset-bottom) + 96px); }
+.top { display: flex; align-items: center; gap: 8px; padding: 6px 4px 10px; }
+.brand { font-weight: 700; font-size: 20px; flex: 1; }
+.icon-btn { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; color: var(--muted); font-size: 20px; }
+.icon-btn:active { background: var(--line); }
+.menu { position: absolute; right: 12px; top: calc(env(safe-area-inset-top) + 56px); background: var(--card); border: 1px solid var(--line);
+  border-radius: 14px; box-shadow: 0 8px 30px rgba(0,0,0,.18); z-index: 30; min-width: 220px; overflow: hidden; }
+.menu a, .menu button { display: block; width: 100%; text-align: left; padding: 14px 16px; text-decoration: none; color: var(--text); }
+.menu a + button, .menu button + button { border-top: 1px solid var(--line); }
+.menu .who { padding: 12px 16px; color: var(--muted); font-size: 13px; border-bottom: 1px solid var(--line); }
+
+.banner { background: var(--warn-soft); color: var(--warn); border-radius: 12px; padding: 10px 14px; margin-bottom: 10px; font-size: 14px; }
+.card { background: var(--card); border-radius: 18px; box-shadow: var(--shadow); padding: 16px; margin-bottom: 12px; }
+
+/* timer */
+.t-label { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.pulse { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 0 var(--accent); animation: pulse 1.6s infinite; }
+@keyframes pulse { 0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 60%, transparent); } 100% { box-shadow: 0 0 0 10px transparent; } }
+.t-clock { font-size: 44px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: -.02em; line-height: 1.1; }
+.t-proj { font-weight: 600; margin-top: 6px; }
+.t-cat { color: var(--muted); font-size: 14px; }
+.t-actions { display: grid; grid-template-columns: 1fr 2fr; gap: 8px; margin-top: 14px; }
+.combos { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+.combo { min-width: 0; width: 100%; display: flex; align-items: center; gap: 12px; text-align: left; padding: 10px 12px; border-radius: 14px; background: var(--bg); min-height: 52px; }
+.combo:active { background: var(--accent-soft); }
+.combo .play { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: var(--accent-ink); font-size: 12px; flex: none; }
+.combo .ct { display: flex; flex-direction: column; min-width: 0; }
+.combo .ct b { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.combo .ct small { color: var(--muted); font-size: 13px; }
+.combo.other .play { background: var(--line); color: var(--text); }
+
+/* buttons */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 48px; padding: 0 16px; border-radius: 14px; font-weight: 600; background: var(--bg); }
+.btn:active { filter: brightness(.95); }
+.btn:disabled { opacity: .5; }
+.btn.primary { background: var(--accent); color: var(--accent-ink); }
+.btn.stop { background: var(--danger); color: #fff; }
+.btn.danger { color: var(--danger); background: var(--danger-soft); }
+.btn.ghost { background: var(--bg); }
+.btn.sm { min-height: 38px; padding: 0 12px; border-radius: 11px; font-size: 14px; }
+.btn.block { width: 100%; }
+
+/* month */
+.m-head { display: flex; align-items: center; gap: 4px; }
+.m-title { flex: 1; text-align: center; font-weight: 700; font-size: 17px; }
+.m-today { font-size: 13px; color: var(--accent); font-weight: 600; padding: 6px 10px; border-radius: 10px; }
+.m-stats { display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--muted); margin: 8px 2px 12px; }
+.m-stats b { color: var(--text); font-size: 16px; }
+.bar { flex: 1; height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
+.cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+.wd { text-align: center; font-size: 12px; color: var(--muted); font-weight: 600; padding-bottom: 2px; }
+.cell { position: relative; aspect-ratio: 1 / 1.05; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; background: transparent; }
+.cell .dn { font-size: 15px; font-weight: 600; line-height: 1; }
+.cell .dh { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; min-height: 13px; line-height: 13px; }
+.cell.we .dn { color: var(--muted); }
+.cell.l1 { background: color-mix(in srgb, var(--accent) 14%, transparent); }
+.cell.l2 { background: color-mix(in srgb, var(--accent) 28%, transparent); }
+.cell.l3 { background: color-mix(in srgb, var(--accent) 45%, transparent); }
+.cell.l1 .dh, .cell.l2 .dh, .cell.l3 .dh { color: var(--text); font-weight: 600; }
+.cell.today { box-shadow: inset 0 0 0 2px var(--accent); }
+.cell.sel { background: var(--accent); color: var(--accent-ink); }
+.cell.sel .dn, .cell.sel .dh { color: var(--accent-ink); }
+.cell.future { opacity: .35; }
+.cell .dot { position: absolute; top: 5px; right: 6px; width: 7px; height: 7px; border-radius: 50%; background: var(--warn); }
+.cell .run { position: absolute; top: 5px; left: 6px; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+.cell.sel .run { background: var(--accent-ink); }
+
+/* day */
+.d-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 10px; }
+.d-title { flex: 1; font-weight: 700; font-size: 17px; }
+.d-total { color: var(--muted); font-weight: 600; font-variant-numeric: tabular-nums; }
+.entry { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: start; width: 100%; text-align: left; padding: 12px 4px; border-top: 1px solid var(--line); }
+.entry:first-of-type { border-top: 0; }
+.entry:active { background: var(--bg); border-radius: 12px; }
+.e-time { font-variant-numeric: tabular-nums; font-weight: 600; font-size: 14px; white-space: nowrap; padding-top: 1px; }
+.e-time sup { color: var(--warn); font-size: 10px; }
+.e-proj { font-weight: 600; font-size: 15px; overflow-wrap: anywhere; }
+.e-meta { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+.e-note { color: var(--muted); font-size: 13px; margin-top: 4px; overflow-wrap: anywhere; }
+.e-dur { color: var(--muted); font-size: 14px; white-space: nowrap; font-variant-numeric: tabular-nums; padding-top: 1px; }
+.tag { font-size: 12px; padding: 2px 8px; border-radius: 999px; background: var(--bg); color: var(--muted); font-weight: 600; }
+.tag.warn { background: var(--warn-soft); color: var(--warn); }
+.tag.ok { background: var(--accent-soft); color: var(--accent); }
+.empty { color: var(--muted); text-align: center; padding: 18px 0 8px; }
+.draft { border: 1.5px dashed color-mix(in srgb, var(--warn) 60%, transparent); background: color-mix(in srgb, var(--warn-soft) 55%, transparent); border-radius: 14px; padding: 12px; margin-bottom: 10px; }
+.dr-top { display: flex; align-items: center; gap: 8px; font-size: 14px; font-variant-numeric: tabular-nums; font-weight: 600; }
+.dr-name { font-weight: 600; margin-top: 6px; }
+.dr-name small { color: var(--muted); font-weight: 400; }
+.dr-proj { color: var(--muted); font-size: 14px; }
+.dr-actions { display: grid; grid-template-columns: 1fr 1fr 1.4fr; gap: 6px; margin-top: 10px; }
+
+/* fab */
+.fab { position: fixed; left: 0; right: 0; bottom: 0; padding: 10px 12px calc(env(safe-area-inset-bottom) + 10px);
+  background: linear-gradient(to top, var(--bg) 65%, transparent); z-index: 10; }
+.fab .btn { max-width: 536px; margin: 0 auto; display: flex; width: 100%; min-height: 54px; font-size: 17px; box-shadow: 0 6px 20px color-mix(in srgb, var(--accent) 35%, transparent); }
+
+/* sheet */
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 40; display: flex; align-items: flex-end; justify-content: center; }
+.sheet { background: var(--card); width: 100%; max-width: 560px; max-height: 92vh; max-height: 92dvh; border-radius: 22px 22px 0 0; display: flex; flex-direction: column; animation: up .2s ease-out; }
+@keyframes up { from { transform: translateY(30px); opacity: .6; } to { transform: none; opacity: 1; } }
+.s-head { display: flex; align-items: center; padding: 14px 12px 6px 18px; }
+.s-title { flex: 1; font-weight: 700; font-size: 18px; }
+.s-body { overflow-y: auto; padding: 4px 18px 12px; -webkit-overflow-scrolling: touch; }
+.s-foot { display: flex; gap: 8px; padding: 10px 18px calc(env(safe-area-inset-bottom) + 12px); border-top: 1px solid var(--line); }
+.s-foot .grow { flex: 1; }
+.field { margin-top: 14px; }
+.label { display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; }
+.label .req { color: var(--danger); }
+.input, .pick { width: 100%; min-height: 48px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); padding: 10px 12px; font-size: 16px; }
+input[type=date].input, input[type=time].input { display: block; min-width: 0; -webkit-appearance: none; appearance: none; }
+input::-webkit-date-and-time-value { text-align: left; }
+body.modal { overflow: hidden; }
+.input:focus, textarea.input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+textarea.input { resize: vertical; min-height: 64px; }
+.pick { display: flex; align-items: center; justify-content: space-between; text-align: left; gap: 8px; }
+.pick .ph { color: var(--muted); }
+.pick .chev { color: var(--muted); }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { min-height: 38px; padding: 0 12px; border-radius: 999px; background: var(--bg); border: 1px solid var(--line); font-size: 14px; font-weight: 600; }
+.chip.on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.chips.scroll { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 2px; scrollbar-width: none; }
+.chips.scroll::-webkit-scrollbar { display: none; }
+.chips.scroll .chip { white-space: nowrap; flex: none; max-width: 70vw; overflow: hidden; text-overflow: ellipsis; }
+.hint { font-size: 14px; color: var(--muted); margin-top: 8px; font-variant-numeric: tabular-nums; }
+.hint b { color: var(--text); }
+.hint .warn { color: var(--warn); font-weight: 600; }
+.err { color: var(--danger); font-size: 14px; margin-top: 10px; font-weight: 600; }
+
+/* project picker */
+.picker { position: fixed; inset: 0; background: var(--card); z-index: 50; display: flex; flex-direction: column; padding-top: env(safe-area-inset-top); }
+.p-head { display: flex; gap: 8px; padding: 10px 12px; align-items: center; border-bottom: 1px solid var(--line); }
+.p-head .input { flex: 1; }
+.p-list { overflow-y: auto; flex: 1; padding: 0 0 calc(env(safe-area-inset-bottom) + 16px); }
+.p-sec { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 700; padding: 16px 16px 6px; }
+.p-item { display: flex; gap: 10px; width: 100%; text-align: left; padding: 13px 16px; border-bottom: 1px solid var(--line); align-items: baseline; }
+.p-item:active, .p-item.on { background: var(--accent-soft); }
+.p-code { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 14px; flex: none; }
+
+/* login */
+.login { max-width: 400px; margin: 0 auto; padding: calc(env(safe-area-inset-top) + 48px) 20px 40px; }
+.login h1 { font-size: 28px; margin: 0 0 4px; }
+.login p { color: var(--muted); margin: 0 0 24px; }
+.login .field:first-of-type { margin-top: 0; }
+.or { text-align: center; color: var(--muted); font-size: 13px; margin: 18px 0; }
+.note { color: var(--muted); font-size: 13px; margin-top: 18px; }
+
+.loading { display: grid; place-items: center; min-height: 70vh; color: var(--muted); }
+.spin { width: 28px; height: 28px; border-radius: 50%; border: 3px solid var(--line); border-top-color: var(--accent); animation: rot .8s linear infinite; margin: 0 auto 10px; }
+@keyframes rot { to { transform: rotate(360deg); } }
+
+.toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom) + 84px); transform: translate(-50%, 20px); opacity: 0; pointer-events: none;
+  background: #111827; color: #fff; padding: 12px 16px; border-radius: 14px; font-size: 15px; font-weight: 500; z-index: 60; transition: .2s; max-width: calc(100vw - 32px); width: max-content; }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+.toast.err { background: var(--danger); }
+</style>
+</head>
+<body>
+
+<div id="boot" class="loading"><div><div class="spin"></div>Načítám…</div></div>
+
+<!-- Login -->
+<div id="loginView" class="login hidden">
+  <h1>Docházka</h1>
+  <p>Přihlášení stejným účtem jako do Jarvisu.</p>
+  <form id="loginForm" autocomplete="on">
+    <div class="field">
+      <label class="label" for="lEmail">E-mail</label>
+      <input class="input" id="lEmail" type="email" autocomplete="username" inputmode="email" required>
+    </div>
+    <div class="field">
+      <label class="label" for="lPass">Heslo</label>
+      <input class="input" id="lPass" type="password" autocomplete="current-password" required>
+    </div>
+    <div id="lErr" class="err hidden"></div>
+    <div class="field"><button class="btn primary block" id="lBtn" type="submit">Přihlásit</button></div>
+  </form>
+  <div class="or">nebo</div>
+  <button class="btn block" id="gBtn" type="button">Přihlásit přes Google</button>
+  <div class="note">Záznamy se ukládají přímo do Jarvisu (jarvis.genlive.pro) pod tvým účtem.</div>
+</div>
+
+<!-- Error -->
+<div id="errView" class="login hidden">
+  <h1>Něco se nepovedlo</h1>
+  <p id="errText"></p>
+  <button class="btn primary block" data-act="retry">Zkusit znovu</button>
+  <div class="field"><button class="btn block" data-act="logout">Odhlásit</button></div>
+</div>
+
+<!-- Main -->
+<div id="mainView" class="wrap hidden">
+  <header class="top">
+    <div class="brand">Docházka</div>
+    <button class="icon-btn" data-act="refresh" aria-label="Obnovit">↻</button>
+    <button class="icon-btn" data-act="menu" aria-label="Menu">⋯</button>
+  </header>
+  <div id="menu" class="menu hidden">
+    <div class="who" id="who"></div>
+    <a href="https://jarvis.genlive.pro/dochazka" target="_blank" rel="noopener">Otevřít Jarvis (plná verze)</a>
+    <button data-act="logout">Odhlásit</button>
+  </div>
+  <div id="offline" class="banner hidden">Jsi offline – záznamy teď nejde ukládat.</div>
+
+  <section class="card" id="timer"></section>
+
+  <section class="card">
+    <div class="m-head">
+      <button class="icon-btn" data-act="prev" aria-label="Předchozí měsíc">‹</button>
+      <div class="m-title" id="mTitle"></div>
+      <button class="m-today hidden" id="mToday" data-act="today">Dnes</button>
+      <button class="icon-btn" id="mNext" data-act="next" aria-label="Další měsíc">›</button>
+    </div>
+    <div class="m-stats" id="mStats"></div>
+    <div class="cal" id="cal"></div>
+  </section>
+
+  <section class="card" id="day">
+    <div class="d-head"><div class="d-title" id="dTitle"></div><div class="d-total" id="dTotal"></div></div>
+    <div id="dDrafts"></div>
+    <div id="dList"></div>
+  </section>
+</div>
+
+<div class="fab hidden" id="fab"><button class="btn primary" data-act="add"><span>＋</span><span id="fabLabel">Přidat záznam</span></button></div>
+
+<!-- Entry sheet -->
+<div id="sheet" class="overlay hidden">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sTitle">
+    <div class="s-head"><div class="s-title" id="sTitle"></div><button class="icon-btn" data-act="close" aria-label="Zavřít">✕</button></div>
+    <div class="s-body">
+      <div class="field" id="fCombosWrap">
+        <span class="label">Naposledy</span>
+        <div class="chips scroll" id="fCombos"></div>
+      </div>
+      <div class="field">
+        <span class="label">Projekt <span class="req">*</span></span>
+        <button class="pick" type="button" data-act="pick-open" id="fProject"></button>
+      </div>
+      <div class="field">
+        <span class="label">Druh práce <span class="req">*</span></span>
+        <div class="chips" id="fCats"></div>
+      </div>
+      <div class="f-when">
+        <div class="field">
+          <label class="label" for="fDate">Den</label>
+          <input class="input" type="date" id="fDate">
+        </div>
+        <div class="field row2">
+          <div><label class="label" for="fFrom">Od</label><input class="input" type="time" id="fFrom" step="300"></div>
+          <div><label class="label" for="fTo">Do</label><input class="input" type="time" id="fTo" step="300"></div>
+        </div>
+        <div class="field chips" id="fPresets"></div>
+        <div class="hint" id="fDur"></div>
+      </div>
+      <div class="field">
+        <label class="label" for="fNotes" id="fNotesLabel">Poznámka</label>
+        <textarea class="input" id="fNotes" rows="2"></textarea>
+      </div>
+      <div class="err hidden" id="fErr"></div>
+    </div>
+    <div class="s-foot">
+      <button class="btn danger" data-act="f-delete" id="fDelete" aria-label="Smazat">Smazat</button>
+      <button class="btn" data-act="f-copy" id="fCopy">Kopírovat</button>
+      <div class="grow"></div>
+      <button class="btn primary" data-act="f-save" id="fSave">Uložit</button>
+    </div>
+  </div>
+</div>
+
+<!-- Project picker -->
+<div id="picker" class="picker hidden">
+  <div class="p-head">
+    <input class="input" id="pSearch" type="search" placeholder="Hledat projekt…" autocomplete="off" enterkeyhint="search">
+    <button class="btn ghost" data-act="pick-close">Zpět</button>
+  </div>
+  <div class="p-list" id="pList"></div>
+</div>
+
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script>
+'use strict';
+const SB_URL = 'https://oogzwynegivcnpephqua.supabase.co';
+const SB_KEY = 'sb_publishable_htksdHH8i5kvPdwFKE-JgA_2NefXTGy'; // public key, same one jarvis.genlive.pro ships to every browser
+const sb = window.supabase.createClient(SB_URL, SB_KEY, {
+  auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, flowType: 'pkce', storageKey: 'dochazka-auth' },
+});
+
+// ---------- helpers ----------
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const pad = (n) => String(n).padStart(2, '0');
+const ymd = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const hm = (d) => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+const parseYmd = (s) => { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d); };
+const addDays = (s, n) => { const d = parseYmd(s); d.setDate(d.getDate() + n); return ymd(d); };
+const isoAt = (date, time) => new Date(`${date}T${time}:00`).toISOString();
+const toMin = (t) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+const fromMin = (m) => `${pad(Math.floor(m / 60) % 24)}:${pad(m % 60)}`;
+const today = () => ymd(new Date());
+const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+const norm = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+const MONTHS = ['leden', 'únor', 'březen', 'duben', 'květen', 'červen', 'červenec', 'srpen', 'září', 'říjen', 'listopad', 'prosinec'];
+const MONTHS_GEN = ['ledna', 'února', 'března', 'dubna', 'května', 'června', 'července', 'srpna', 'září', 'října', 'listopadu', 'prosince'];
+const DAYS = ['neděle', 'pondělí', 'úterý', 'středa', 'čtvrtek', 'pátek', 'sobota'];
+
+function fmtMin(min) {
+  min = Math.round(min);
+  const h = Math.floor(min / 60), m = min % 60;
+  return h ? (m ? `${h} h ${m} min` : `${h} h`) : `${m} min`;
+}
+const fmtH = (h) => (Math.round(h * 10) / 10).toLocaleString('cs-CZ');
+const entryMin = (e) => Math.max(0, ((e.end_time ? new Date(e.end_time) : new Date()) - new Date(e.start_time)) / 60000);
+const projLabel = (p) => (!p ? 'Neznámý projekt' : p.project_id ? `${p.project_id} – ${p.name}` : p.name);
+const isActiveProj = (p) => p && (p.status === 'active' || p.status === 'concept');
+
+function dayTitle(s) {
+  const d = parseYmd(s), t = today();
+  const pre = s === t ? 'Dnes · ' : s === addDays(t, -1) ? 'Včera · ' : '';
+  return `${pre}${cap(DAYS[d.getDay()])} ${d.getDate()}. ${MONTHS_GEN[d.getMonth()]}`;
+}
+
+let toastTimer;
+function toast(msg, kind = '') {
+  const el = $('#toast');
+  el.textContent = msg;
+  el.className = `toast show ${kind}`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.className = 'toast'; }, kind === 'err' ? 5000 : 2600);
+}
+const isOverlap = (e) => e?.code === '23P01' || String(e?.message || '').includes('time_entries_no_overlap');
+function errMsg(e, fallback) {
+  if (isOverlap(e)) return 'Tento čas se překrývá s jiným záznamem.';
+  if (e?.code === '42501') return 'Na tohle nemáš v Jarvisu oprávnění.';
+  console.error(e);
+  return fallback + (e?.message ? ` (${e.message})` : '');
+}
+
+function show(view) {
+  for (const id of ['boot', 'loginView', 'errView', 'mainView']) $('#' + id).classList.toggle('hidden', id !== view);
+  $('#fab').classList.toggle('hidden', view !== 'mainView');
+}
+
+// ---------- state ----------
+const now0 = new Date();
+const S = {
+  user: null, memberId: null, goal: 180,
+  projects: [], projById: new Map(), cats: [], catById: new Map(),
+  y: now0.getFullYear(), m: now0.getMonth() + 1, sel: ymd(now0),
+  entries: [], byDate: new Map(), monthHours: null,
+  drafts: [], draftsByDate: new Map(), assignByDate: new Map(),
+  running: null, recent: [], recentProj: [], combos: [], presets: [],
+};
+
+// ---------- data ----------
+async function loadMember() {
+  const { data, error } = await sb.rpc('get_team_member_profiles');
+  if (error) throw error;
+  const me = Array.isArray(data) ? data.find((p) => p.user_id === S.user.id) : null;
+  if (!me) throw new Error('Tvůj účet nemá v Jarvisu přiřazený profil člena týmu.');
+  S.memberId = me.id;
+  if (me.monthly_hours_threshold) S.goal = me.monthly_hours_threshold;
+}
+async function loadProjects() {
+  const { data, error } = await sb.from('projects').select('id,name,project_id,status');
+  if (error) throw error;
+  S.projects = data || [];
+  S.projById = new Map(S.projects.map((p) => [p.id, p]));
+}
+async function loadCats() {
+  const { data, error } = await sb.from('work_categories').select('id,name,sort_order')
+    .order('sort_order', { ascending: true }).order('name', { ascending: true });
+  if (error) throw error;
+  S.cats = data || [];
+  S.catById = new Map(S.cats.map((c) => [c.id, c]));
+}
+async function loadRunning() {
+  const { data, error } = await sb.rpc('get_running_time_entry', { p_team_member_id: S.memberId });
+  if (error) throw error;
+  S.running = data?.[0] || null;
+}
+async function loadRecent() {
+  const { data, error } = await sb.from('time_entries').select('project_id,work_category_id,start_time,end_time')
+    .eq('team_member_id', S.memberId).order('start_time', { ascending: false }).limit(80);
+  if (error) throw error;
+  S.recent = data || [];
+  // recent project + work type pairs, newest first
+  const seen = new Set(), seenP = new Set();
+  S.combos = []; S.recentProj = [];
+  for (const e of S.recent) {
+    if (!seenP.has(e.project_id)) { seenP.add(e.project_id); S.recentProj.push(e.project_id); }
+    const k = `${e.project_id}|${e.work_category_id || ''}`;
+    if (seen.has(k) || !isActiveProj(S.projById.get(e.project_id))) continue;
+    seen.add(k);
+    S.combos.push({ project_id: e.project_id, cat_id: e.work_category_id || '' });
+  }
+  S.combos = S.combos.slice(0, 6);
+  // time ranges used at least twice, plus a few common defaults
+  const cnt = new Map();
+  for (const e of S.recent) {
+    if (!e.end_time) continue;
+    const k = `${hm(new Date(e.start_time))}–${hm(new Date(e.end_time))}`;
+    cnt.set(k, (cnt.get(k) || 0) + 1);
+  }
+  const top = [...cnt.entries()].filter(([, n]) => n >= 2).sort((a, b) => b[1] - a[1]).map(([k]) => k).slice(0, 3);
+  S.presets = [...new Set([...top, '08:00–16:00', '09:00–17:00', '09:00–18:00'])].slice(0, 4);
+}
+async function loadMonth() {
+  const start = new Date(S.y, S.m - 1, 1), end = new Date(S.y, S.m, 1);
+  const [ent, mh] = await Promise.all([
+    sb.from('time_entries')
+      .select('*, project:project_id(id,name,project_id), work_category:work_category_id(id,name)')
+      .eq('team_member_id', S.memberId).gte('start_time', start.toISOString()).lt('start_time', end.toISOString())
+      .order('start_time', { ascending: true }),
+    sb.rpc('get_monthly_hours', { p_team_member_id: S.memberId, p_year: S.y, p_month: S.m }),
+  ]);
+  if (ent.error) throw ent.error;
+  S.entries = ent.data || [];
+  S.monthHours = mh.error ? null : (mh.data?.[0] || null);
+  S.byDate = new Map();
+  for (const e of S.entries) {
+    const k = ymd(new Date(e.start_time));
+    if (!S.byDate.has(k)) S.byDate.set(k, []);
+    S.byDate.get(k).push(e);
+  }
+  await loadDrafts().catch((e) => { console.warn('drafts', e); S.drafts = []; S.draftsByDate = new Map(); });
+}
+
+// Suggested entries from actions you are assigned to (same logic as Jarvis /dochazka).
+async function loadDrafts() {
+  const first = `${S.y}-${pad(S.m)}-01`;
+  const last = `${S.y}-${pad(S.m)}-${pad(new Date(S.y, S.m, 0).getDate())}`;
+  S.assignByDate = new Map();
+  const { data, error } = await sb.from('action_profession_assignments').select(`
+      id, professions(name),
+      start_time_entry:start_time_entry_id(entry_date, entry_time),
+      end_time_entry:end_time_entry_id(entry_date, entry_time),
+      actions!inner(id, name, project_id, action_date_from, action_date_to, action_time_from, action_time_to, status, projects(id, project_id, name))`)
+    .eq('team_member_id', S.memberId).lte('actions.action_date_from', last).gte('actions.action_date_to', first)
+    .neq('actions.status', 'cancelled');
+  if (error) throw error;
+  const drafts = new Map();
+  if (data?.length) {
+    const dis = await sb.from('dismissed_draft_entries').select('action_id, entry_date').eq('team_member_id', S.memberId);
+    const dismissed = new Set((dis.data || []).map((d) => `${d.action_id}:${d.entry_date}`));
+    const t = today();
+    for (const a of data) {
+      const act = a.actions;
+      if (!act) continue;
+      const proj = act.projects, projectId = proj?.id || act.project_id, prof = a.professions?.name || '';
+      let from = '08:00', to = '16:00';
+      if (a.start_time_entry?.entry_time) from = a.start_time_entry.entry_time.slice(0, 5);
+      else if (act.action_time_from && act.action_time_from.slice(0, 5) !== '00:00') from = act.action_time_from.slice(0, 5);
+      if (a.end_time_entry?.entry_time) to = a.end_time_entry.entry_time.slice(0, 5);
+      else if (act.action_time_to && act.action_time_to.slice(0, 5) !== '23:45') to = act.action_time_to.slice(0, 5);
+      let d = act.action_date_from.slice(0, 10) < first ? first : act.action_date_from.slice(0, 10);
+      const endD = act.action_date_to.slice(0, 10) > last ? last : act.action_date_to.slice(0, 10);
+      for (; d <= endD; d = addDays(d, 1)) {
+        if (!S.assignByDate.has(d)) S.assignByDate.set(d, new Set());
+        S.assignByDate.get(d).add(projectId);
+        if (d > t || dismissed.has(`${act.id}:${d}`)) continue;
+        if ((S.byDate.get(d) || []).some((e) => e.project_id === projectId)) continue;
+        const key = `${act.id}:${d}`, ex = drafts.get(key);
+        if (ex) {
+          if (from < ex.startTime) ex.startTime = from;
+          if (to > ex.endTime) ex.endTime = to;
+          if (prof && !ex.professionName.includes(prof)) ex.professionName += `, ${prof}`;
+        } else {
+          drafts.set(key, { key, actionId: act.id, actionName: act.name, projectId, project: proj, date: d, startTime: from, endTime: to, professionName: prof });
+        }
+      }
+    }
+  }
+  S.drafts = [...drafts.values()];
+  S.draftsByDate = new Map();
+  for (const d of S.drafts) {
+    if (!S.draftsByDate.has(d.date)) S.draftsByDate.set(d.date, []);
+    S.draftsByDate.get(d.date).push(d);
+  }
+}
+
+async function overlapText(start, end, excludeId) {
+  const { data, error } = await sb.rpc('find_overlapping_time_entry', {
+    p_team_member_id: S.memberId, p_start_time: start, p_end_time: end ?? undefined, p_exclude_entry_id: excludeId ?? undefined,
+  });
+  if (error) throw error;
+  const o = data?.[0];
+  if (!o) return null;
+  const f = (iso) => new Date(iso).toLocaleString('cs-CZ', { day: 'numeric', month: 'numeric', hour: '2-digit', minute: '2-digit' });
+  const p = o.project_code ? `${o.project_code} – ${o.project_name}` : (o.project_name || '');
+  return `Překrývá se se záznamem ${f(o.start_time)} – ${o.end_time ? f(o.end_time) : 'běží'}${p ? `, ${p}` : ''}.`;
+}
+
+async function refresh() {
+  await Promise.all([loadRunning(), loadRecent()]);
+  await loadMonth();
+  render();
+}
+
+// ---------- render ----------
+function render() { renderTimer(); renderMonth(); renderDay(); }
+
+let clockTimer = null;
+function tick() {
+  const el = $('#clock');
+  if (!el || !S.running) return;
+  const s = Math.max(0, Math.floor((Date.now() - new Date(S.running.start_time).getTime()) / 1000));
+  el.textContent = `${pad(Math.floor(s / 3600))}:${pad(Math.floor((s % 3600) / 60))}:${pad(s % 60)}`;
+}
+function renderTimer() {
+  const el = $('#timer');
+  clearInterval(clockTimer);
+  if (S.running) {
+    const r = S.running, p = S.projById.get(r.project_id);
+    el.innerHTML = `
+      <div class="t-label"><span class="pulse"></span>Timer běží od ${esc(hm(new Date(r.start_time)))}</div>
+      <div class="t-clock" id="clock">00:00:00</div>
+      <div class="t-proj">${esc(p ? projLabel(p) : r.project_name)}</div>
+      ${r.work_category_name ? `<div class="t-cat">${esc(r.work_category_name)}</div>` : ''}
+      <div class="t-actions">
+        <button class="btn" data-act="edit-running">Upravit</button>
+        <button class="btn stop" data-act="stop">■ Zastavit</button>
+      </div>`;
+    tick();
+    clockTimer = setInterval(tick, 1000);
+  } else {
+    const combos = S.combos.slice(0, 3).map((c, i) => `
+      <button class="combo" data-act="start-combo" data-i="${i}">
+        <span class="play">▶</span>
+        <span class="ct"><b>${esc(projLabel(S.projById.get(c.project_id)))}</b><small>${esc(S.catById.get(c.cat_id)?.name || 'bez druhu práce')}</small></span>
+      </button>`).join('');
+    el.innerHTML = `
+      <div class="t-label">Spustit timer</div>
+      <div class="combos">${combos}
+        <button class="combo other" data-act="start-other"><span class="play">▶</span><span class="ct"><b>Jiný projekt…</b></span></button>
+      </div>`;
+  }
+}
+
+function renderMonth() {
+  const t = today(), now = new Date();
+  const isCur = S.y === now.getFullYear() && S.m === now.getMonth() + 1;
+  $('#mTitle').textContent = `${cap(MONTHS[S.m - 1])} ${S.y}`;
+  $('#mNext').disabled = isCur;
+  $('#mNext').style.visibility = isCur ? 'hidden' : '';
+  $('#mToday').classList.toggle('hidden', isCur && S.sel === t);
+  let total = S.monthHours?.total_hours;
+  if (total == null) total = S.entries.filter((e) => e.end_time).reduce((a, e) => a + entryMin(e), 0) / 60;
+  total = Number(total) || 0;
+  $('#mStats').innerHTML = `<span><b>${fmtH(total)} h</b> z ${esc(S.goal)} h</span><span class="bar"><i style="width:${Math.min(100, (total / S.goal) * 100).toFixed(1)}%"></i></span>`;
+
+  const first = new Date(S.y, S.m - 1, 1);
+  const offset = (first.getDay() + 6) % 7;
+  const days = new Date(S.y, S.m, 0).getDate();
+  const runDay = S.running ? ymd(new Date(S.running.start_time)) : null;
+  let html = ['Po', 'Út', 'St', 'Čt', 'Pá', 'So', 'Ne'].map((d) => `<div class="wd">${d}</div>`).join('');
+  html += '<div></div>'.repeat(offset);
+  for (let d = 1; d <= days; d++) {
+    const k = `${S.y}-${pad(S.m)}-${pad(d)}`;
+    const mins = (S.byDate.get(k) || []).reduce((a, e) => a + entryMin(e), 0);
+    const dow = (offset + d - 1) % 7;
+    const cls = ['cell'];
+    if (dow >= 5) cls.push('we');
+    if (mins > 0) cls.push(mins >= 480 ? 'l3' : mins >= 240 ? 'l2' : 'l1');
+    if (k === t) cls.push('today');
+    if (k === S.sel) cls.push('sel');
+    if (k > t) cls.push('future');
+    html += `<button class="${cls.join(' ')}" data-act="day" data-d="${k}" aria-label="${d}. ${MONTHS_GEN[S.m - 1]}">
+      <span class="dn">${d}</span><span class="dh">${mins ? fmtH(mins / 60) : ''}</span>
+      ${S.draftsByDate.has(k) ? '<i class="dot"></i>' : ''}${k === runDay ? '<i class="run"></i>' : ''}</button>`;
+  }
+  $('#cal').innerHTML = html;
+}
+
+function renderDay() {
+  const list = S.byDate.get(S.sel) || [];
+  const drafts = S.draftsByDate.get(S.sel) || [];
+  const mins = list.reduce((a, e) => a + entryMin(e), 0);
+  $('#dTitle').textContent = dayTitle(S.sel);
+  $('#dTotal').textContent = mins ? fmtMin(mins) : '';
+  $('#dDrafts').innerHTML = drafts.map((d, i) => `
+    <div class="draft">
+      <div class="dr-top"><span class="tag warn">Návrh z akce</span>${esc(d.startTime)}–${esc(d.endTime)}</div>
+      <div class="dr-name">${esc(d.actionName)}${d.professionName ? ` <small>(${esc(d.professionName)})</small>` : ''}</div>
+      <div class="dr-proj">${esc(projLabel(S.projById.get(d.projectId) || d.project))}</div>
+      <div class="dr-actions">
+        <button class="btn sm" data-act="draft-hide" data-i="${i}">Skrýt</button>
+        <button class="btn sm" data-act="draft-edit" data-i="${i}">Upravit</button>
+        <button class="btn sm primary" data-act="draft-ok" data-i="${i}">Potvrdit</button>
+      </div>
+    </div>`).join('');
+  $('#dList').innerHTML = list.length ? list.map((e) => {
+    const s = new Date(e.start_time), en = e.end_time ? new Date(e.end_time) : null;
+    const nextDay = en && ymd(en) !== ymd(s);
+    const cat = e.work_category?.name;
+    return `<button class="entry" data-act="edit" data-id="${esc(e.id)}">
+      <div class="e-time">${hm(s)}–${en ? hm(en) : 'běží'}${nextDay ? '<sup>+1</sup>' : ''}</div>
+      <div class="e-main">
+        <div class="e-proj">${esc(projLabel(e.project || S.projById.get(e.project_id)))}</div>
+        <div class="e-meta">${cat ? `<span class="tag">${esc(cat)}</span>` : ''}${!e.end_time ? '<span class="tag ok">běží</span>' : ''}${e.auto_stopped ? '<span class="tag warn">automaticky zastaveno</span>' : ''}</div>
+        ${e.notes ? `<div class="e-note">${esc(e.notes)}</div>` : ''}
+      </div>
+      <div class="e-dur">${fmtMin(entryMin(e))}</div>
+    </button>`;
+  }).join('') : (drafts.length ? '' : '<div class="empty">Žádné záznamy</div>');
+  const d = parseYmd(S.sel);
+  $('#fabLabel').textContent = S.sel === today() ? 'Přidat záznam na dnes' : `Přidat záznam na ${d.getDate()}. ${d.getMonth() + 1}.`;
+}
+
+// ---------- entry form ----------
+let F = null;
+function openForm(mode, o = {}) {
+  F = {
+    mode, id: o.id || null, project_id: o.project_id || '', cat_id: o.cat_id || '',
+    date: o.date || S.sel, from: o.from || '', to: o.to ?? '', notes: o.notes || '', wasRunning: !!o.wasRunning,
+  };
+  if (mode === 'new' && !F.from) {
+    const list = (S.byDate.get(F.date) || []).filter((e) => e.end_time);
+    if (list.length) {
+      const lastEnd = new Date(list[list.length - 1].end_time);
+      F.from = hm(lastEnd);
+      F.to = fromMin(Math.min(toMin(F.from) + 60, 23 * 60 + 55));
+    } else { F.from = '08:00'; F.to = '16:00'; }
+  }
+  $('#sTitle').textContent = { new: 'Nový záznam', edit: 'Upravit záznam', timer: 'Spustit timer' }[mode];
+  $('.f-when').classList.toggle('hidden', mode === 'timer');
+  $('#fCombosWrap').classList.toggle('hidden', mode === 'edit' || !S.combos.length);
+  $('#fDelete').classList.toggle('hidden', mode !== 'edit');
+  $('#fCopy').classList.toggle('hidden', mode !== 'edit' || F.wasRunning);
+  $('#fSave').textContent = mode === 'timer' ? '▶ Spustit' : 'Uložit';
+  $('#fNotesLabel').innerHTML = mode === 'edit' ? 'Poznámka <span class="req">*</span>' : 'Poznámka';
+  $('#fNotes').placeholder = mode === 'edit' ? 'Proč záznam upravuješ… (Jarvis to vyžaduje)' : 'Co jsi dělal(a)… (nepovinné)';
+  $('#fDate').value = F.date;
+  $('#fFrom').value = F.from;
+  $('#fTo').value = F.to;
+  $('#fNotes').value = F.notes;
+  $('#fErr').classList.add('hidden');
+  $('#fCombos').innerHTML = S.combos.map((c, i) =>
+    `<button class="chip" type="button" data-act="f-combo" data-i="${i}">${esc(projLabel(S.projById.get(c.project_id)))}${c.cat_id ? ' · ' + esc(S.catById.get(c.cat_id)?.name || '') : ''}</button>`).join('');
+  $('#fCats').innerHTML = S.cats.map((c) => `<button class="chip" type="button" data-act="f-cat" data-id="${esc(c.id)}">${esc(c.name)}</button>`).join('');
+  $('#fPresets').innerHTML = S.presets.map((p) => `<button class="chip" type="button" data-act="f-preset" data-p="${esc(p)}">${esc(p.replace(/(^|–)0/g, '$1'))}</button>`).join('')
+    + '<button class="chip" type="button" data-act="f-now">Do teď</button>';
+  syncForm();
+  $('#sheet').classList.remove('hidden');
+  document.body.classList.add('modal');
+  $('.s-body').scrollTop = 0;
+}
+function closeForm() { $('#sheet').classList.add('hidden'); document.body.classList.remove('modal'); F = null; }
+
+function formSpan() {
+  if (!F.from || !F.to) return null;
+  let diff = toMin(F.to) - toMin(F.from);
+  const nextDay = diff < 0;
+  if (nextDay) diff += 1440;
+  return { diff, nextDay };
+}
+function syncForm() {
+  const p = S.projById.get(F.project_id);
+  $('#fProject').innerHTML = p ? `<span>${esc(projLabel(p))}</span><span class="chev">›</span>` : '<span class="ph">Vyber projekt…</span><span class="chev">›</span>';
+  for (const b of document.querySelectorAll('#fCats .chip')) b.classList.toggle('on', b.dataset.id === F.cat_id);
+  for (const b of document.querySelectorAll('#fCombos .chip')) {
+    const c = S.combos[+b.dataset.i];
+    b.classList.toggle('on', c.project_id === F.project_id && c.cat_id === F.cat_id);
+  }
+  for (const b of document.querySelectorAll('#fPresets .chip[data-p]')) b.classList.toggle('on', b.dataset.p === `${F.from}–${F.to}`);
+  const sp = formSpan();
+  let h = '';
+  if (sp && sp.diff > 0) h = `Délka <b>${fmtMin(sp.diff)}</b>${sp.nextDay ? ' · <span class="warn">konec až další den</span>' : ''}`;
+  else if (F.from && !F.to && F.wasRunning) h = 'Bez konce = timer poběží dál';
+  else if (sp && sp.diff === 0) h = '<span class="warn">Začátek a konec jsou stejné</span>';
+  $('#fDur').innerHTML = h;
+}
+function formError(msg) { const el = $('#fErr'); el.textContent = msg; el.classList.remove('hidden'); el.scrollIntoView({ block: 'nearest' }); }
+
+async function saveForm() {
+  F.notes = $('#fNotes').value.trim();
+  if (!F.project_id) return formError('Vyber projekt.');
+  if (!F.cat_id) return formError('Vyber druh práce.');
+  if (F.mode === 'timer') {
+    if (await startTimer(F.project_id, F.cat_id, F.notes)) closeForm();
+    return;
+  }
+  if (!F.date || !F.from) return formError('Vyplň den a začátek.');
+  if (!F.to && !(F.mode === 'edit' && F.wasRunning)) return formError('Vyplň konec.');
+  const sp = formSpan();
+  if (sp && sp.diff === 0) return formError('Konec musí být po začátku.');
+  if (F.mode === 'edit' && !F.notes) return formError('Při úpravě záznamu Jarvis vyžaduje poznámku.');
+  const start = isoAt(F.date, F.from);
+  const end = F.to ? isoAt(sp.nextDay ? addDays(F.date, 1) : F.date, F.to) : null;
+  const ov = await overlapText(start, end, F.id);
+  if (ov) return formError(ov);
+  const row = { project_id: F.project_id, work_category_id: F.cat_id || null, start_time: start, end_time: end, notes: F.notes || null };
+  let error;
+  if (F.mode === 'edit') {
+    ({ error } = await sb.from('time_entries').update({ ...row, updated_at: new Date().toISOString() }).eq('id', F.id));
+  } else {
+    ({ error } = await sb.from('time_entries').insert({ ...row, team_member_id: S.memberId, created_by: S.user.id }));
+  }
+  if (error) return formError(errMsg(error, 'Uložení se nepovedlo.'));
+  const savedDate = F.date, wasEdit = F.mode === 'edit';
+  closeForm();
+  toast(wasEdit ? 'Záznam upraven' : 'Záznam uložen');
+  await goToDate(savedDate);
+}
+
+async function goToDate(date) {
+  const d = parseYmd(date);
+  S.sel = date; S.y = d.getFullYear(); S.m = d.getMonth() + 1;
+  await refresh();
+}
+
+async function startTimer(pid, cid, notes) {
+  if (S.running) { toast('Timer už běží', 'err'); return false; }
+  const now = new Date().toISOString();
+  const ov = await overlapText(now, null, null);
+  if (ov) { toast(ov, 'err'); return false; }
+  const { error } = await sb.from('time_entries').insert({
+    team_member_id: S.memberId, project_id: pid, work_category_id: cid || null, start_time: now, notes: notes || null, created_by: S.user.id,
+  });
+  if (error) {
+    toast(String(error.message || '').includes('already has a running') ? 'Timer už běží' : errMsg(error, 'Timer se nepodařilo spustit.'), 'err');
+    return false;
+  }
+  toast('Timer spuštěn');
+  S.sel = today();
+  const n = new Date(); S.y = n.getFullYear(); S.m = n.getMonth() + 1;
+  await refresh();
+  return true;
+}
+
+async function stopTimer() {
+  const r = S.running;
+  if (!r) return;
+  const now = new Date().toISOString();
+  const ov = await overlapText(r.start_time, now, r.id);
+  if (ov) return toast(ov, 'err');
+  const { error } = await sb.from('time_entries').update({ end_time: now, updated_at: now }).eq('id', r.id);
+  if (error) return toast(errMsg(error, 'Timer se nepodařilo zastavit.'), 'err');
+  toast(`Zastaveno · ${fmtMin((Date.now() - new Date(r.start_time)) / 60000)}`);
+  await refresh();
+}
+
+function editEntry(e) {
+  const s = new Date(e.start_time), en = e.end_time ? new Date(e.end_time) : null;
+  openForm('edit', {
+    id: e.id, project_id: e.project_id, cat_id: e.work_category_id || '', date: ymd(s), from: hm(s),
+    to: en ? hm(en) : '', notes: e.notes || '', wasRunning: !e.end_time,
+  });
+}
+
+// ---------- project picker ----------
+function openPicker() {
+  $('#pSearch').value = '';
+  renderPicker();
+  $('#picker').classList.remove('hidden');
+}
+function closePicker() { $('#picker').classList.add('hidden'); $('#pSearch').blur(); }
+function renderPicker() {
+  const q = norm($('#pSearch').value.trim());
+  const usable = S.projects.filter((p) => isActiveProj(p) || p.id === F?.project_id);
+  const sortKey = (p) => (p.project_id || '') + ' ' + p.name;
+  const item = (p) => `<button class="p-item${p.id === F?.project_id ? ' on' : ''}" data-act="pick" data-id="${esc(p.id)}">${p.project_id ? `<span class="p-code">${esc(p.project_id)}</span>` : ''}<span>${esc(p.name)}</span></button>`;
+  let html = '';
+  if (q) {
+    const hits = usable.filter((p) => norm(`${p.project_id || ''} ${p.name}`).includes(q))
+      .sort((a, b) => sortKey(b).localeCompare(sortKey(a), 'cs'));
+    html = hits.length ? hits.map(item).join('') : '<div class="empty">Nic nenalezeno</div>';
+  } else {
+    const shown = new Set();
+    const section = (title, ps) => {
+      ps = ps.filter((p) => p && !shown.has(p.id));
+      if (!ps.length) return '';
+      ps.forEach((p) => shown.add(p.id));
+      return `<div class="p-sec">${esc(title)}</div>${ps.map(item).join('')}`;
+    };
+    const assigned = [...(S.assignByDate.get(F?.date) || [])].map((id) => S.projById.get(id)).filter((p) => usable.includes(p));
+    html += section('Tvoje akce v tento den', assigned);
+    html += section('Naposledy použité', S.recentProj.map((id) => S.projById.get(id)).filter((p) => usable.includes(p)).slice(0, 8));
+    html += section('Všechny projekty', [...usable].sort((a, b) => sortKey(b).localeCompare(sortKey(a), 'cs')));
+  }
+  $('#pList').innerHTML = html;
+}
+
+// ---------- actions ----------
+async function busy(btn, fn) {
+  if (btn?.disabled) return;
+  if (btn) btn.disabled = true;
+  try { await fn(); } catch (e) { toast(errMsg(e, 'Něco se nepovedlo.'), 'err'); } finally { if (btn) btn.disabled = false; }
+}
+function needOnline() {
+  if (navigator.onLine) return true;
+  toast('Jsi offline', 'err');
+  return false;
+}
+
+const actions = {
+  retry: () => boot(),
+  logout: async () => { $('#menu').classList.add('hidden'); await sb.auth.signOut().catch(() => {}); S.user = null; S.memberId = null; show('loginView'); },
+  menu: () => $('#menu').classList.toggle('hidden'),
+  refresh: (b) => busy(b, async () => { await refresh(); toast('Aktualizováno'); }),
+  prev: (b) => busy(b, async () => {
+    if (--S.m < 1) { S.m = 12; S.y--; }
+    const dim = new Date(S.y, S.m, 0).getDate();
+    S.sel = `${S.y}-${pad(S.m)}-${pad(Math.min(parseYmd(S.sel).getDate(), dim))}`;
+    await loadMonth(); render();
+  }),
+  next: (b) => busy(b, async () => {
+    if (++S.m > 12) { S.m = 1; S.y++; }
+    const n = new Date();
+    if (S.y === n.getFullYear() && S.m === n.getMonth() + 1) S.sel = today();
+    else S.sel = `${S.y}-${pad(S.m)}-${pad(Math.min(parseYmd(S.sel).getDate(), new Date(S.y, S.m, 0).getDate()))}`;
+    await loadMonth(); render();
+  }),
+  today: (b) => busy(b, () => goToDate(today())),
+  day: (b) => {
+    S.sel = b.dataset.d;
+    renderMonth(); renderDay();
+    $('#day').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  },
+  add: () => { if (needOnline()) openForm('new'); },
+  edit: (b) => { const e = S.entries.find((x) => String(x.id) === b.dataset.id); if (e && needOnline()) editEntry(e); },
+  'edit-running': (b) => busy(b, async () => {
+    if (!needOnline()) return;
+    const { data, error } = await sb.from('time_entries').select('*').eq('id', S.running.id).single();
+    if (error) throw error;
+    editEntry(data);
+  }),
+  stop: (b) => { if (needOnline()) return busy(b, stopTimer); },
+  'start-combo': (b) => {
+    if (!needOnline()) return;
+    const c = S.combos[+b.dataset.i];
+    if (!c.cat_id) return openForm('timer', { project_id: c.project_id });
+    return busy(b, () => startTimer(c.project_id, c.cat_id));
+  },
+  'start-other': () => { if (needOnline()) openForm('timer'); },
+  'draft-ok': (b) => busy(b, async () => {
+    if (!needOnline()) return;
+    const d = (S.draftsByDate.get(S.sel) || [])[+b.dataset.i];
+    const nextDay = toMin(d.endTime) <= toMin(d.startTime);
+    const start = isoAt(d.date, d.startTime), end = isoAt(nextDay ? addDays(d.date, 1) : d.date, d.endTime);
+    const ov = await overlapText(start, end, null);
+    if (ov) { toast(ov, 'err'); return; }
+    const { error } = await sb.from('time_entries').insert({
+      team_member_id: S.memberId, project_id: d.projectId, work_category_id: null, start_time: start, end_time: end,
+      notes: d.professionName ? `${d.actionName} (${d.professionName})` : d.actionName, created_by: S.user.id,
+    });
+    if (error) throw error;
+    toast('Záznam uložen');
+    await refresh();
+  }),
+  'draft-edit': (b) => {
+    if (!needOnline()) return;
+    const d = (S.draftsByDate.get(S.sel) || [])[+b.dataset.i];
+    openForm('new', { project_id: d.projectId, date: d.date, from: d.startTime, to: d.endTime, notes: d.professionName ? `${d.actionName} (${d.professionName})` : d.actionName });
+  },
+  'draft-hide': (b) => busy(b, async () => {
+    if (!needOnline()) return;
+    const d = (S.draftsByDate.get(S.sel) || [])[+b.dataset.i];
+    const { error } = await sb.from('dismissed_draft_entries').insert({ team_member_id: S.memberId, action_id: d.actionId, entry_date: d.date });
+    if (error) throw error;
+    await loadDrafts(); renderMonth(); renderDay();
+  }),
+  close: () => closeForm(),
+  'f-combo': (b) => { const c = S.combos[+b.dataset.i]; F.project_id = c.project_id; F.cat_id = c.cat_id; syncForm(); },
+  'f-cat': (b) => { F.cat_id = F.cat_id === b.dataset.id ? '' : b.dataset.id; syncForm(); },
+  'f-preset': (b) => { [F.from, F.to] = b.dataset.p.split('–'); $('#fFrom').value = F.from; $('#fTo').value = F.to; syncForm(); },
+  'f-now': () => {
+    const n = new Date(); const m = Math.round((n.getHours() * 60 + n.getMinutes()) / 5) * 5;
+    F.to = fromMin(Math.min(m, 23 * 60 + 55)); $('#fTo').value = F.to;
+    if (F.date !== today()) { F.date = today(); $('#fDate').value = F.date; }
+    syncForm();
+  },
+  'f-save': (b) => busy(b, saveForm),
+  'f-copy': () => {
+    F.mode = 'new'; F.id = null; F.wasRunning = false; F.notes = '';
+    const keep = { ...F };
+    openForm('new', keep);
+    toast('Kopie – změň den nebo čas a ulož');
+  },
+  'f-delete': (b) => busy(b, async () => {
+    if (!confirm('Opravdu smazat tento záznam?')) return;
+    const { error } = await sb.from('time_entries').delete().eq('id', F.id);
+    if (error) throw error;
+    closeForm();
+    toast('Záznam smazán');
+    await refresh();
+  }),
+  'pick-open': () => openPicker(),
+  'pick-close': () => closePicker(),
+  pick: (b) => { F.project_id = b.dataset.id; closePicker(); syncForm(); },
+};
+
+document.addEventListener('click', (ev) => {
+  const b = ev.target.closest('[data-act]');
+  if (!b) {
+    if (!ev.target.closest('#menu')) $('#menu').classList.add('hidden');
+    return;
+  }
+  if (b.dataset.act !== 'menu') $('#menu').classList.add('hidden');
+  ev.preventDefault();
+  actions[b.dataset.act]?.(b, ev);
+});
+$('#sheet').addEventListener('click', (ev) => { if (ev.target.id === 'sheet') closeForm(); });
+$('#fDate').addEventListener('change', (e) => { F.date = e.target.value; syncForm(); });
+$('#fFrom').addEventListener('input', (e) => { F.from = e.target.value; syncForm(); });
+$('#fTo').addEventListener('input', (e) => { F.to = e.target.value; syncForm(); });
+$('#pSearch').addEventListener('input', renderPicker);
+
+// ---------- auth + boot ----------
+$('#loginForm').addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  const btn = $('#lBtn'), err = $('#lErr');
+  btn.disabled = true; err.classList.add('hidden');
+  try {
+    const { data, error } = await sb.auth.signInWithPassword({ email: $('#lEmail').value.trim(), password: $('#lPass').value });
+    if (error) {
+      err.textContent = error.message === 'Invalid login credentials' ? 'Špatný e-mail nebo heslo.' : error.message;
+      err.classList.remove('hidden');
+      return;
+    }
+    $('#lPass').value = '';
+    await enter(data.user);
+  } finally { btn.disabled = false; }
+});
+$('#gBtn').addEventListener('click', () => {
+  sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname } });
+});
+
+async function enter(user) {
+  S.user = user;
+  show('boot');
+  try {
+    await loadMember();
+    await Promise.all([loadProjects(), loadCats(), loadRunning()]);
+    await loadRecent();
+    await loadMonth();
+    $('#who').textContent = user.email || '';
+    show('mainView');
+    render();
+  } catch (e) {
+    console.error(e);
+    $('#errText').textContent = e?.message || String(e);
+    show('errView');
+  }
+}
+
+async function boot() {
+  show('boot');
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) return show('loginView');
+  await enter(session.user);
+}
+
+sb.auth.onAuthStateChange((event) => {
+  if (event === 'SIGNED_OUT' && S.user) { S.user = null; S.memberId = null; closeForm(); show('loginView'); }
+});
+
+function syncOnline() { $('#offline').classList.toggle('hidden', navigator.onLine); }
+window.addEventListener('online', syncOnline);
+window.addEventListener('offline', syncOnline);
+syncOnline();
+
+// Coming back to the app (e.g. from the home screen): pull fresh data.
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && S.memberId && !F) refresh().catch(() => {});
+});
+
+if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
+
+boot();
+</script>
+</body>
+</html>
