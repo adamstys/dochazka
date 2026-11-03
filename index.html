@@ -220,9 +220,10 @@ textarea.input { resize: vertical; min-height: 64px; }
     <div class="field"><button class="btn primary block" id="lBtn" type="submit">Přihlásit</button></div>
   </form>
   <div class="help">
-    <b>Do Jarvisu chodíš přes Google a heslo nemáš?</b>
-    Nastav si ho v Jarvisu přes „Zapomněli jste heslo?“ – přijde ti e-mail s odkazem. Google účet zůstane fungovat dál.
-    <a class="btn block" href="https://jarvis.genlive.pro/auth/forgot" target="_blank" rel="noopener">Nastavit heslo v Jarvisu</a>
+    <b>Do Jarvisu chodíš přes Google?</b>
+    Heslo ke Googlu tady nefunguje – potřebuješ vlastní heslo do Jarvisu. Nastavíš si ho v Jarvisu:
+    <b>Můj profil → Nastavení hesla</b> (klidně z počítače, kde jsi v Jarvisu přihlášený). Google účet zůstane fungovat dál.
+    <a class="btn block" href="https://jarvis.genlive.pro/profile" target="_blank" rel="noopener">Otevřít profil v Jarvisu</a>
   </div>
   <div class="note">Záznamy se ukládají přímo do Jarvisu (jarvis.genlive.pro) pod tvým účtem.</div>
 </div>
@@ -962,7 +963,11 @@ $('#loginForm').addEventListener('submit', async (ev) => {
   try {
     const { data, error } = await sb.auth.signInWithPassword({ email: $('#lEmail').value.trim(), password: $('#lPass').value });
     if (error) {
-      err.textContent = error.message === 'Invalid login credentials' ? 'Špatný e-mail nebo heslo.' : error.message;
+      const code = error.code || '';
+      err.textContent = code === 'invalid_credentials' || error.message === 'Invalid login credentials'
+        ? 'Jarvis tenhle e-mail a heslo nezná. Pokud chodíš do Jarvisu přes Google, nastav si heslo v profilu (viz níže).'
+        : code === 'email_not_confirmed' ? 'E-mail ještě není potvrzený – mrkni do schránky na potvrzovací e-mail od Jarvisu.'
+        : error.message;
       err.classList.remove('hidden');
       return;
     }

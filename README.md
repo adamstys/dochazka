@@ -38,8 +38,8 @@ Pak v mobilu otevřít adresu a „Přidat na plochu“ (iPhone: Sdílet → Př
 ### Přihlášení
 
 - **E-mail + heslo** – stejné jako do Jarvisu.
-- Kdo chodí do Jarvisu přes Google a heslo nemá, nastaví si ho v Jarvisu přes
-  „Zapomněli jste heslo?“ (jarvis.genlive.pro/auth/forgot) nebo v profilu → „Nastavit heslo“.
+- Kdo chodí do Jarvisu přes Google, nemá v Jarvisu heslo (heslo ke Googlu tu nefunguje).
+  Nastaví si ho v Jarvisu: Můj profil (jarvis.genlive.pro/profile) → Nastavení hesla.
   Přihlášení přes Google tu není: fungovalo by až po přidání adresy této stránky do Supabase
   projektu Jarvisu (Authentication → URL Configuration → Redirect URLs).
 
