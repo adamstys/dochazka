@@ -184,7 +184,9 @@ textarea.input { resize: vertical; min-height: 64px; }
 .login h1 { font-size: 28px; margin: 0 0 4px; }
 .login p { color: var(--muted); margin: 0 0 24px; }
 .login .field:first-of-type { margin-top: 0; }
-.or { text-align: center; color: var(--muted); font-size: 13px; margin: 18px 0; }
+.help { margin-top: 24px; padding: 14px; border-radius: 14px; background: var(--card); color: var(--muted); font-size: 14px; box-shadow: var(--shadow); }
+.help b { display: block; color: var(--text); margin-bottom: 4px; }
+.help .btn { margin-top: 12px; text-decoration: none; color: var(--text); background: var(--bg); }
 .note { color: var(--muted); font-size: 13px; margin-top: 18px; }
 
 .loading { display: grid; place-items: center; min-height: 70vh; color: var(--muted); }
@@ -217,8 +219,11 @@ textarea.input { resize: vertical; min-height: 64px; }
     <div id="lErr" class="err hidden"></div>
     <div class="field"><button class="btn primary block" id="lBtn" type="submit">Přihlásit</button></div>
   </form>
-  <div class="or">nebo</div>
-  <button class="btn block" id="gBtn" type="button">Přihlásit přes Google</button>
+  <div class="help">
+    <b>Do Jarvisu chodíš přes Google a heslo nemáš?</b>
+    Nastav si ho v Jarvisu přes „Zapomněli jste heslo?“ – přijde ti e-mail s odkazem. Google účet zůstane fungovat dál.
+    <a class="btn block" href="https://jarvis.genlive.pro/auth/forgot" target="_blank" rel="noopener">Nastavit heslo v Jarvisu</a>
+  </div>
   <div class="note">Záznamy se ukládají přímo do Jarvisu (jarvis.genlive.pro) pod tvým účtem.</div>
 </div>
 
@@ -964,9 +969,6 @@ $('#loginForm').addEventListener('submit', async (ev) => {
     $('#lPass').value = '';
     await enter(data.user);
   } finally { btn.disabled = false; }
-});
-$('#gBtn').addEventListener('click', () => {
-  sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: location.origin + location.pathname } });
 });
 
 async function enter(user) {

@@ -25,7 +25,10 @@ Zapisuje přímo do Jarvisu (jarvis.genlive.pro) – do stejné databáze a stej
 
 ## Nasazení
 
-Libovolný statický hosting přes HTTPS, např.:
+Teď běží na GitHub Pages z větve `gh-pages`: https://adamstys.github.io/dochazka/
+(změny je potřeba nahrát do `main` i `gh-pages`).
+
+Jde to i na libovolný jiný statický hosting přes HTTPS, např.:
 
 - subdoména na serveru, kde běží Jarvis (Plesk), např. `dochazka.genlive.pro`,
 - GitHub Pages, Netlify, Cloudflare Pages.
@@ -34,10 +37,11 @@ Pak v mobilu otevřít adresu a „Přidat na plochu“ (iPhone: Sdílet → Př
 
 ### Přihlášení
 
-- **E-mail + heslo** funguje hned.
-- **Google** funguje až po přidání adresy této stránky do Supabase projektu Jarvisu:
-  Authentication → URL Configuration → Redirect URLs (např. `https://dochazka.genlive.pro/**`).
-  Bez toho Google přesměruje zpět do Jarvisu místo sem.
+- **E-mail + heslo** – stejné jako do Jarvisu.
+- Kdo chodí do Jarvisu přes Google a heslo nemá, nastaví si ho v Jarvisu přes
+  „Zapomněli jste heslo?“ (jarvis.genlive.pro/auth/forgot) nebo v profilu → „Nastavit heslo“.
+  Přihlášení přes Google tu není: fungovalo by až po přidání adresy této stránky do Supabase
+  projektu Jarvisu (Authentication → URL Configuration → Redirect URLs).
 
 ## Soubory
 
