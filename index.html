@@ -184,6 +184,8 @@ textarea.input { resize: vertical; min-height: 64px; }
 .login h1 { font-size: 28px; margin: 0 0 4px; }
 .login p { color: var(--muted); margin: 0 0 24px; }
 .login .field:first-of-type { margin-top: 0; }
+.show-pass { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 14px; color: var(--muted); }
+.show-pass input { width: 18px; height: 18px; accent-color: var(--accent); }
 .help { margin-top: 24px; padding: 14px; border-radius: 14px; background: var(--card); color: var(--muted); font-size: 14px; box-shadow: var(--shadow); }
 .help b { display: block; color: var(--text); margin-bottom: 4px; }
 .help .btn { margin-top: 12px; text-decoration: none; color: var(--text); background: var(--bg); }
@@ -210,11 +212,12 @@ textarea.input { resize: vertical; min-height: 64px; }
   <form id="loginForm" autocomplete="on">
     <div class="field">
       <label class="label" for="lEmail">E-mail</label>
-      <input class="input" id="lEmail" type="email" autocomplete="username" inputmode="email" required>
+      <input class="input" id="lEmail" type="email" autocomplete="username" inputmode="email" autocapitalize="off" autocorrect="off" spellcheck="false" required>
     </div>
     <div class="field">
       <label class="label" for="lPass">Heslo</label>
-      <input class="input" id="lPass" type="password" autocomplete="current-password" required>
+      <input class="input" id="lPass" type="password" autocomplete="current-password" autocapitalize="off" autocorrect="off" spellcheck="false" required>
+      <label class="show-pass"><input type="checkbox" id="lShow"> Zobrazit heslo</label>
     </div>
     <div id="lErr" class="err hidden"></div>
     <div class="field"><button class="btn primary block" id="lBtn" type="submit">Přihlásit</button></div>
@@ -954,6 +957,7 @@ $('#fDate').addEventListener('change', (e) => { F.date = e.target.value; syncFor
 $('#fFrom').addEventListener('input', (e) => { F.from = e.target.value; syncForm(); });
 $('#fTo').addEventListener('input', (e) => { F.to = e.target.value; syncForm(); });
 $('#pSearch').addEventListener('input', renderPicker);
+$('#lShow').addEventListener('change', (e) => { $('#lPass').type = e.target.checked ? 'text' : 'password'; });
 
 // ---------- auth + boot ----------
 $('#loginForm').addEventListener('submit', async (ev) => {
@@ -964,15 +968,18 @@ $('#loginForm').addEventListener('submit', async (ev) => {
     const { data, error } = await sb.auth.signInWithPassword({ email: $('#lEmail').value.trim(), password: $('#lPass').value });
     if (error) {
       const code = error.code || '';
-      err.textContent = code === 'invalid_credentials' || error.message === 'Invalid login credentials'
-        ? 'Jarvis tenhle e-mail a heslo nezná. Pokud chodíš do Jarvisu přes Google, nastav si heslo v profilu (viz níže).'
+      err.textContent = (code === 'invalid_credentials' || error.message === 'Invalid login credentials'
+        ? 'Jarvis tenhle e-mail a heslo nezná. Zkontroluj heslo přes „Zobrazit heslo“.'
         : code === 'email_not_confirmed' ? 'E-mail ještě není potvrzený – mrkni do schránky na potvrzovací e-mail od Jarvisu.'
-        : error.message;
+        : error.message) + ` [${code || error.status || error.name}]`;
       err.classList.remove('hidden');
       return;
     }
     $('#lPass').value = '';
     await enter(data.user);
+  } catch (e) {
+    err.textContent = `Přihlášení selhalo: ${e?.message || e}`;
+    err.classList.remove('hidden');
   } finally { btn.disabled = false; }
 });
 
