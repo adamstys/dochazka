@@ -209,10 +209,10 @@ textarea.input { resize: vertical; min-height: 64px; }
 <div id="loginView" class="login hidden">
   <h1>Docházka</h1>
   <p>Přihlášení stejným účtem jako do Jarvisu.</p>
-  <form id="loginForm" autocomplete="on">
+  <form id="loginForm" autocomplete="on" novalidate>
     <div class="field">
-      <label class="label" for="lEmail">E-mail</label>
-      <input class="input" id="lEmail" type="email" autocomplete="username" inputmode="email" autocapitalize="off" autocorrect="off" spellcheck="false" required>
+      <label class="label" for="lEmail">Přihlašovací jméno (e-mail)</label>
+      <input class="input" id="lEmail" type="text" autocomplete="username" inputmode="email" autocapitalize="off" autocorrect="off" spellcheck="false" required>
     </div>
     <div class="field">
       <label class="label" for="lPass">Heslo</label>
